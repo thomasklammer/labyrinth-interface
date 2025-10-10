@@ -277,10 +277,18 @@ components:
       type: object
       description: "Represents a single tile on the game board."
       properties:
-        type: { type: string, enum: [STRAIGHT, CORNER, T_SHAPE], description: "The shape of the path on the tile." }
-        orientation: { type: integer, description: "The rotation of the tile in degrees (0, 90, 180, 270)." }
-        treasure: { $ref: "#/components/schemas/Treasure" }
-        bonus: { $ref: "#/components/schemas/Bonus" }
+        entrances:
+          type: array
+          description: "List of open directions from this tile (e.g., UP, RIGHT, DOWN, LEFT)."
+          items:
+            type: string
+            enum: [UP, RIGHT, DOWN, LEFT]
+          example: ["UP", "RIGHT"]
+    treasure:
+      $ref: "#/components/schemas/Treasure"
+    bonus:
+      $ref: "#/components/schemas/Bonus"
+
     GameBoard:
       type: object
       properties:
