@@ -78,7 +78,9 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <layers>true</layers>
+                    <layers>
+                        <enabled>true</enabled>
+                    </layers>
                 </configuration>
 			</plugin>
 		</plugins>
