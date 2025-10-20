@@ -25,7 +25,7 @@ jobs:
           java-version: '21'
 
       - name: Build management.api (Maven)
-        run: mvn -B -DskipTests -Drevision=${{ env.VERSION }} -pl management.api -am package
+        run: mvn -B -DskipTests -Drevision=${{ env.VERSION }} -f management.api/pom.xml package
 
       - name: Upload JAR as artifact
         uses: actions/upload-artifact@v4
