@@ -25,6 +25,7 @@ channels:
       message:
         oneOf:
           - $ref: "#/components/messages/connectRequest"
+          - $ref: "#/components/messages/startGameAction"
           - $ref: "#/components/messages/pushTileAction"
           - $ref: "#/components/messages/movePawnAction"
           - $ref: "#/components/messages/useBonusAction"
@@ -39,12 +40,19 @@ channels:
           - $ref: "#/components/messages/lobbyState"
           - $ref: "#/components/messages/gameStarted"
           - $ref: "#/components/messages/gameStateUpdate"
-          - $ref: "#/components/messages/playerTurn"
-          - $ref: "#/components/messages/actionError"
+          - $ref: "#/components/messages/playerTurn" 
           - $ref: "#/components/messages/playerDisconnected"
           - $ref: "#/components/messages/bonusSpawned"
           - $ref: "#/components/messages/achievementUnlocked"
           - $ref: "#/components/messages/gameOver"
+  /server/unicast:
+    subscribe:
+      summary: "Used by the server to unicast game events and state updates to a single client."
+      description: "This is a server-to-one-client channel."
+      message:
+        oneOf:
+          - $ref: "#/components/messages/nextTreasureCard"
+          - $ref: "#/components/messages/actionError"
 
 components:
   messages:
@@ -53,6 +61,10 @@ components:
       summary: "Action to join the game lobby."
       payload:
         $ref: "#/components/schemas/ConnectRequestPayload"
+    startGameAction:
+      summary: "Action to start the game with specific settings. Only the Administrator can start the game."
+      payload:
+        $ref: "#/components/schemas/StartGamePayload"
     pushTileAction:
       summary: "Action to push the extra tile into a row or column."
       payload:
@@ -76,7 +88,7 @@ components:
       payload:
         $ref: "#/components/schemas/LobbyStatePayload"
     gameStarted:
-      summary: "Event broadcast once when the game starts, containing the initial state."
+      summary: "Event sent to each player once the game started with their treasure cards"
       payload:
         $ref: "#/components/schemas/GameStartedPayload"
     gameStateUpdate:
@@ -107,6 +119,10 @@ components:
       summary: "Event broadcast when the game has ended, containing final scores and stats."
       payload:
         $ref: "#/components/schemas/GameOverPayload"
+    nextTreasureCard:
+      summary: "Event unicast when the player needs a new treasure card."
+      payload:
+        $ref: "#/components/schemas/NextTreasureCardPayload"
 
   schemas:
     # Action Payloads (Client -> Server)
@@ -120,6 +136,18 @@ components:
         username:
           type: string
           description: "The desired username for the player."
+    StartGamePayload:
+      type: object
+      properties:
+        gameDurationInSeconds:
+          type: integer
+          description: ""
+        boardSize:
+          type: object
+          properties:
+            rows: { type: integer }
+            cols: { type: integer }
+
     PushTileActionPayload:
       type: object
       properties:
@@ -128,11 +156,18 @@ components:
           enum: [PUSH_TILE]
         rowOrColIndex:
           type: integer
-          description: "The index of the row or column to push (e.g., 1, 3, 5)."
+          description: "The index of the row or column to push (e.g., 0, 3, 5)."
         direction:
           type: string
           enum: [UP, DOWN, LEFT, RIGHT]
           description: "The direction to push the tile from."
+        tilEntrances:
+          type: array
+          description: "List of open directions from this tile (e.g., UP, RIGHT, DOWN, LEFT)."
+          items:
+            type: string
+            enum: [UP, RIGHT, DOWN, LEFT]
+          example: ["UP", "RIGHT"]
     MovePawnActionPayload:
       type: object
       properties:
@@ -177,14 +212,6 @@ components:
         eventType:
           type: string
           enum: [GAME_STARTED]
-        board: { $ref: "#/components/schemas/GameBoard" }
-        players:
-          type: array
-          items: { $ref: "#/components/schemas/PlayerState" }
-        yourTreasureCards:
-          type: array
-          description: "A personalized list of treasure cards for the receiving client."
-          items: { $ref: "#/components/schemas/Treasure" }
     GameStateUpdatePayload:
       type: object
       properties:
@@ -252,6 +279,10 @@ components:
         ranking:
           type: array
           items: { $ref: "#/components/schemas/RankingEntry" }
+    NextTreasureCardPayload:
+      type: object
+      properties:
+        treasure: { $ref: "#/components/schemas/Treasure" }
 
     # Reusable Data Schemas
     PlayerInfo:
@@ -267,7 +298,17 @@ components:
           description: "Full state of a player during a game."
           properties:
             position: { $ref: "#/components/schemas/Coordinates" }
-            treasuresFound: { type: integer }
+            treasuresFound: 
+              type: array
+              description: "Found treasures by player"
+              items: { $ref: "#/components/schemas/Treasure" }
+            points:
+              type: integer
+            achievements:
+              type: array
+              items:
+                type: string
+                enum: [Runner, Pusher, Blocker, TimeWaster, Hattrick]
     Coordinates:
       type: object
       properties:
