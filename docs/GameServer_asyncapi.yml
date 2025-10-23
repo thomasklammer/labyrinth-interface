@@ -25,6 +25,7 @@ channels:
       message:
         oneOf:
           - $ref: "#/components/messages/connectRequest"
+          - $ref: "#/components/messages/startGameAction"
           - $ref: "#/components/messages/pushTileAction"
           - $ref: "#/components/messages/movePawnAction"
           - $ref: "#/components/messages/useBonusAction"
@@ -60,6 +61,10 @@ components:
       summary: "Action to join the game lobby."
       payload:
         $ref: "#/components/schemas/ConnectRequestPayload"
+    startGameAction:
+      summary: "Action to start the game with specific settings. Only the Administrator can start the game."
+      payload:
+        $ref: "#/components/schemas/StartGamePayload"
     pushTileAction:
       summary: "Action to push the extra tile into a row or column."
       payload:
@@ -131,6 +136,18 @@ components:
         username:
           type: string
           description: "The desired username for the player."
+    StartGamePayload:
+      type: object
+      properties:
+        gameDurationInSeconds:
+          type: integer
+          description: ""
+        boardSize:
+          type: object
+          properties:
+            rows: { type: integer }
+            cols: { type: integer }
+
     PushTileActionPayload:
       type: object
       properties:
