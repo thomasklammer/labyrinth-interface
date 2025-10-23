@@ -39,8 +39,7 @@ channels:
           - $ref: "#/components/messages/lobbyState"
           - $ref: "#/components/messages/gameStarted"
           - $ref: "#/components/messages/gameStateUpdate"
-          - $ref: "#/components/messages/playerTurn"
-          - $ref: "#/components/messages/actionError"
+          - $ref: "#/components/messages/playerTurn" 
           - $ref: "#/components/messages/playerDisconnected"
           - $ref: "#/components/messages/bonusSpawned"
           - $ref: "#/components/messages/achievementUnlocked"
@@ -52,6 +51,7 @@ channels:
       message:
         oneOf:
           - $ref: "#/components/messages/nextTreasureCard"
+          - $ref: "#/components/messages/actionError"
 
 components:
   messages:
@@ -265,9 +265,6 @@ components:
     NextTreasureCardPayload:
       type: object
       properties:
-        playerId:
-          type: string
-          description: "The ID of the player receiving the new treasure card."
         treasure: { $ref: "#/components/schemas/Treasure" }
 
     # Reusable Data Schemas
