@@ -139,7 +139,7 @@ components:
           enum: [PUSH_TILE]
         rowOrColIndex:
           type: integer
-          description: "The index of the row or column to push (e.g., 1, 3, 5)."
+          description: "The index of the row or column to push (e.g., 0, 3, 5)."
         direction:
           type: string
           enum: [UP, DOWN, LEFT, RIGHT]
