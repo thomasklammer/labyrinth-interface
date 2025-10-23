@@ -284,8 +284,10 @@ components:
             type: string
             enum: [UP, RIGHT, DOWN, LEFT]
           example: ["UP", "RIGHT"]
-        treasure: $ref: "#/components/schemas/Treasure"
-        bonus: $ref: "#/components/schemas/Bonus"
+        treasure: 
+          $ref: "#/components/schemas/Treasure"
+        bonus: 
+          $ref: "#/components/schemas/Bonus"
     GameBoard:
       type: object
       properties:
