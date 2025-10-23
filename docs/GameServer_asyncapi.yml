@@ -133,6 +133,13 @@ components:
           type: string
           enum: [UP, DOWN, LEFT, RIGHT]
           description: "The direction to push the tile from."
+        tilEntrances:
+          type: array
+          description: "List of open directions from this tile (e.g., UP, RIGHT, DOWN, LEFT)."
+          items:
+            type: string
+            enum: [UP, RIGHT, DOWN, LEFT]
+          example: ["UP", "RIGHT"]
     MovePawnActionPayload:
       type: object
       properties:
