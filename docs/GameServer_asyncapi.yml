@@ -45,6 +45,13 @@ channels:
           - $ref: "#/components/messages/bonusSpawned"
           - $ref: "#/components/messages/achievementUnlocked"
           - $ref: "#/components/messages/gameOver"
+  /server/unicast:
+    subscribe:
+      summary: "Used by the server to unicast game events and state updates to a single client."
+      description: "This is a server-to-one-client channel."
+      message:
+        oneOf:
+          - $ref: "#/components/messages/nextTreasureCard"
 
 components:
   messages:
@@ -76,7 +83,7 @@ components:
       payload:
         $ref: "#/components/schemas/LobbyStatePayload"
     gameStarted:
-      summary: "Event broadcast once when the game starts, containing the initial state."
+      summary: "Event sent to each player once the game started with their treasure cards"
       payload:
         $ref: "#/components/schemas/GameStartedPayload"
     gameStateUpdate:
@@ -107,6 +114,10 @@ components:
       summary: "Event broadcast when the game has ended, containing final scores and stats."
       payload:
         $ref: "#/components/schemas/GameOverPayload"
+    nextTreasureCard:
+      summary: "Event unicast when the player needs a new treasure card."
+      payload:
+        $ref: "#/components/schemas/NextTreasureCardPayload"
 
   schemas:
     # Action Payloads (Client -> Server)
@@ -184,14 +195,6 @@ components:
         eventType:
           type: string
           enum: [GAME_STARTED]
-        board: { $ref: "#/components/schemas/GameBoard" }
-        players:
-          type: array
-          items: { $ref: "#/components/schemas/PlayerState" }
-        yourTreasureCards:
-          type: array
-          description: "A personalized list of treasure cards for the receiving client."
-          items: { $ref: "#/components/schemas/Treasure" }
     GameStateUpdatePayload:
       type: object
       properties:
@@ -259,6 +262,13 @@ components:
         ranking:
           type: array
           items: { $ref: "#/components/schemas/RankingEntry" }
+    NextTreasureCardPayload:
+      type: object
+      properties:
+        playerId:
+          type: string
+          description: "The ID of the player receiving the new treasure card."
+        treasure: { $ref: "#/components/schemas/Treasure" }
 
     # Reusable Data Schemas
     PlayerInfo:
