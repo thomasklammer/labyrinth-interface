@@ -302,6 +302,13 @@ components:
               type: array
               description: "Found treasures by player"
               items: { $ref: "#/components/schemas/Treasure" }
+            points:
+              type: integer
+            achievements:
+              type: array
+              items:
+                type: string
+                enum: [Runner, Pusher, Blocker, TimeWaster, Hattrick]
     Coordinates:
       type: object
       properties:
