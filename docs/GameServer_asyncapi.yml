@@ -274,7 +274,10 @@ components:
           description: "Full state of a player during a game."
           properties:
             position: { $ref: "#/components/schemas/Coordinates" }
-            treasuresFound: { type: integer }
+            treasuresFound: 
+              type: array
+              description: "Found treasures by player"
+              items: { $ref: "#/components/schemas/Treasure" }
     Coordinates:
       type: object
       properties:
