@@ -139,14 +139,20 @@ components:
     StartGamePayload:
       type: object
       properties:
+        action:
+          type: string
+          enum: [START_GAME]
         gameDurationInSeconds:
           type: integer
-          description: ""
+          description: "An object specifying the grid dimensions (number of rows and columns) of the game board."
         boardSize:
           type: object
           properties:
             rows: { type: integer }
             cols: { type: integer }
+        treasureCardCount:
+          type: integer
+          description: "The total integer count of unique treasures available in game. This number must be evenly divisible by the number of players to ensure fair distribution."
 
     PushTileActionPayload:
       type: object
