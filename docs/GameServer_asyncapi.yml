@@ -28,8 +28,11 @@ channels:
           - $ref: "#/components/messages/startGameAction"
           - $ref: "#/components/messages/pushTileAction"
           - $ref: "#/components/messages/movePawnAction"
-          - $ref: "#/components/messages/useBonusAction"
           - $ref: "#/components/messages/toggleAI"
+          - $ref: "#/components/messages/useBeamAction"
+          - $ref: "#/components/messages/usePushFixedAction"
+          - $ref: "#/components/messages/useSwapAction"
+          - $ref: "#/components/messages/usePushTwiceAction"
 
   /server/broadcast:
     subscribe:
@@ -42,7 +45,6 @@ channels:
           - $ref: "#/components/messages/gameStateUpdate"
           - $ref: "#/components/messages/playerTurn" 
           - $ref: "#/components/messages/playerDisconnected"
-          - $ref: "#/components/messages/bonusSpawned"
           - $ref: "#/components/messages/achievementUnlocked"
           - $ref: "#/components/messages/gameOver"
   /server/unicast:
@@ -73,14 +75,27 @@ components:
       summary: "Action to move the player's pawn after pushing a tile."
       payload:
         $ref: "#/components/schemas/MovePawnActionPayload"
-    useBonusAction:
-      summary: "Action to consume a collected bonus item."
-      payload:
-        $ref: "#/components/schemas/UseBonusActionPayload"
     toggleAI:
       summary: "Action to enable or disable the AI for the player's pawn."
       payload:
         $ref: "#/components/schemas/ToggleAIPayload"
+
+    useBeamAction:
+      summary: "Use the BEAM bonus to teleport to a specific coordinate."
+      payload:
+        $ref: "#/components/schemas/UseBeamActionPayload"
+    useSwapAction:
+      summary: "Use the SWAP bonus to exchange positions with another player."
+      payload:
+        $ref: "#/components/schemas/UseSwapActionPayload"
+    usePushFixedAction:
+      summary: "Use the PUSH_FIXED bonus to move a fixed tile."
+      payload:
+        $ref: "#/components/schemas/UsePushFixedActionPayload"
+    usePushTwiceAction:
+      summary: "Use the PUSH_TWICE bonus to allow an extra push this turn."
+      payload:
+        $ref: "#/components/schemas/UsePushTwiceActionPayload"
 
     # Server -> Client Messages
     lobbyState:
@@ -107,10 +122,6 @@ components:
       summary: "Event broadcast when a player disconnects or times out."
       payload:
         $ref: "#/components/schemas/PlayerDisconnectedPayload"
-    bonusSpawned:
-      summary: "Event broadcast when a new bonus appears on the board."
-      payload:
-        $ref: "#/components/schemas/BonusSpawnedPayload"
     achievementUnlocked:
       summary: "Event broadcast when a player unlocks an achievement."
       payload:
@@ -153,6 +164,9 @@ components:
         treasureCardCount:
           type: integer
           description: "The total integer count of unique treasures available in game. This number must be evenly divisible by the number of players to ensure fair distribution."
+        boniCount:
+          type: integer
+          description: "The total integer count of boni available on the board."
 
     PushTileActionPayload:
       type: object
@@ -201,6 +215,48 @@ components:
         enabled:
           type: boolean
           description: "Set to true to enable AI, false to disable."
+          
+    UseBeamActionPayload:
+      type: object
+      properties:
+        action:
+          type: string
+          enum: [USE_BEAM]
+        targetCoordinates:
+          $ref: "#/components/schemas/Coordinates"
+    UseSwapActionPayload:
+      type: object
+      properties:
+        action:
+          type: string
+          enum: [USE_SWAP]
+        targetPlayerId:
+          type: string
+          description: "The ID of the player to swap positions with."
+
+    UsePushFixedActionPayload:
+      type: object
+      properties:
+        action:
+          type: string
+          enum: [USE_PUSH_FIXED]
+        rowOrColIndex:
+          type: integer
+        direction:
+          type: string
+          enum: [UP, DOWN, LEFT, RIGHT]
+        tileEntrances:
+          type: array
+          items:
+            type: string
+            enum: [UP, RIGHT, DOWN, LEFT]
+
+    UsePushTwiceActionPayload:
+      type: object
+      properties:
+        action:
+          type: string
+          enum: [USE_PUSH_TWICE]
 
     # Event Payloads (Server -> Client)
     LobbyStatePayload:
@@ -257,14 +313,6 @@ components:
         playerId:
           type: string
           description: "The ID of the player who disconnected."
-    BonusSpawnedPayload:
-      type: object
-      properties:
-        eventType:
-          type: string
-          enum: [BONUS_SPAWNED]
-        bonus: { $ref: "#/components/schemas/Bonus" }
-        position: { $ref: "#/components/schemas/Coordinates" }
     AchievementUnlockedPayload:
       type: object
       properties:
