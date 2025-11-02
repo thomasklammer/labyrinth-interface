@@ -42,7 +42,7 @@ java -jar target\management.api-0.0.1-SNAPSHOT.jar
 
 ## Default URL
 
-After startup the API is available at: http://localhost:8080
+After startup the API is available at: http://localhost:8081
 
 ## Configuration (key settings)
 
@@ -55,15 +55,15 @@ The most important settings are in `src/main/resources/application.properties`:
 
 ## H2 Console
 
-- URL: http://localhost:8080/h2-console
+- URL: http://localhost:8081/h2-console
 - JDBC URL: `jdbc:h2:mem:testdb`
 - User: `sa`
 - Password: (empty)
 
 ## OpenAPI / Swagger
 
-- OpenAPI JSON: http://localhost:8080/v3/api-docs
-- Swagger UI: http://localhost:8080/swagger-ui.html
+- OpenAPI JSON: http://localhost:8081/v3/api-docs
+- Swagger UI: http://localhost:8081/swagger-ui.html
 - The application also exposes `/v3/api-docs.yaml` which the Swagger UI can use.
 
 

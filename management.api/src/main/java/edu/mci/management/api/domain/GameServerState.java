@@ -1,4 +1,4 @@
-package edu.mci.management.api.dto;
+package edu.mci.management.api.domain;
 
 public enum GameServerState {
     LOBBY,
