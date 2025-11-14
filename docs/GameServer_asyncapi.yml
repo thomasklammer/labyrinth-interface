@@ -39,6 +39,7 @@ channels:
         oneOf:
           - $ref: "#/components/messages/serverInfoEvent"
           - $ref: "#/components/messages/lobbyStateEvent"
+          - $ref: "#/components/messages/connectAckEvent"
           - $ref: "#/components/messages/gameStartedEvent"
           - $ref: "#/components/messages/gameStateUpdateEvent"
           - $ref: "#/components/messages/playerTurnEvent"
@@ -53,7 +54,7 @@ components:
     # --- Client -> Server Messages (Commands) ---
     connectCommand:
       messageId: connectCommand
-      summary: "Join the game lobby."
+      summary: "Join the game lobby. Send player ID if reconnecting."
       payload:
         $ref: "#/components/schemas/ConnectCommandPayload"
     disconnectCommand:
@@ -108,6 +109,15 @@ components:
       summary: "Unicast: Initial server information."
       payload:
         $ref: "#/components/schemas/ServerInfoPayload"
+    connectAckEvent:
+      messageId: connectAckEvent
+      summary: "Unicast: Acknowledges a successful lobby join and returns the assigned player id."
+      description: |
+        Sent only to the connecting client immediately after a successful `connectCommand`.
+        Contains the `playerId` the server assigned or confirmed so the client knows
+        that joining the lobby succeeded and which id to persist for reconnection.
+      payload:
+        $ref: "#/components/schemas/ConnectAckEventPayload"
     lobbyStateEvent:
       messageId: lobbyStateEvent
       summary: "Broadcast: Lobby player list changed."
@@ -185,6 +195,7 @@ components:
         - ACHIEVEMENT_UNLOCKED
         - GAME_OVER
         - NEXT_TREASURE
+        - CONNECT_ACK
 
     Direction:
       type: string
@@ -219,6 +230,14 @@ components:
       properties:
         type: { $ref: "#/components/schemas/CommandType" }
         username: { type: string, minLength: 1, maxLength: 20 }
+        playerId:
+          type: string
+          description: >-
+            Optional: previously assigned player identifier used for reconnection.
+            Clients MAY send this value when re-connecting so the server can
+            re-associate the session with an existing player. If omitted or
+            invalid the server will assign a new player id and return it in the
+            subsequent `CONNECT_ACK` event.
     
     DisconnectCommandPayload:
       type: object
@@ -306,6 +325,15 @@ components:
         serverVersion: { type: string }
         protocolVersion: { type: string }
         motd: { type: string }
+
+    ConnectAckEventPayload:
+      type: object
+      required: [type, playerId]
+      properties:
+        type: { $ref: "#/components/schemas/EventType" }
+        playerId:
+          type: string
+          description: "The unique identifier assigned to the player by the server. Clients should persist this id for reconnection attempts."
 
     LobbyStateEventPayload:
       type: object
