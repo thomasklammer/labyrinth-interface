@@ -104,7 +104,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.basedir}/../docs/GameManagemantServer_openapi.yml</inputSpec>
+                            <inputSpec>${project.basedir}/../docs/GameManagementServer_openapi.yml</inputSpec>
 
                             <generatorName>spring</generatorName>
 

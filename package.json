@@ -1,0 +1,28 @@
+{
+  "name": "labyrinth-interface",
+  "version": "1.0.0",
+  "description": "This repository contains the API specifications and generated models for \"The Amazing Labyrinth\". It defines the interfaces for game communication (real-time) and server management (REST).",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thomasklammer/labyrinth-interface.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/thomasklammer/labyrinth-interface/issues"
+  },
+  "homepage": "https://github.com/thomasklammer/labyrinth-interface#readme",
+  "dependencies": {
+    "@asyncapi/modelina": "^5.10.1",
+    "@asyncapi/parser": "^3.4.0"
+  }
+}
