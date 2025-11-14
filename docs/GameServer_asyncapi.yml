@@ -23,6 +23,7 @@ channels:
       message:
         oneOf:
           - $ref: "#/components/messages/connectCommand"
+          - $ref: "#/components/messages/disconnectCommand"
           - $ref: "#/components/messages/startGameCommand"
           - $ref: "#/components/messages/pushTileCommand"
           - $ref: "#/components/messages/movePawnCommand"
@@ -55,6 +56,11 @@ components:
       summary: "Join the game lobby."
       payload:
         $ref: "#/components/schemas/ConnectCommandPayload"
+    disconnectCommand:
+      messageId: disconnectCommand
+      summary: "Leave the game lobby."
+      payload:
+        $ref: "#/components/schemas/DisconnectCommandPayload"
     startGameCommand:
       messageId: startGameCommand
       summary: "Admin only: Start the game with specific settings."
@@ -156,6 +162,7 @@ components:
       type: string
       enum:
         - CONNECT
+        - DISCONNECT
         - START_GAME
         - PUSH_TILE
         - MOVE_PAWN
@@ -207,6 +214,13 @@ components:
     # === Command Payloads    ===
     # ===========================
     ConnectCommandPayload:
+      type: object
+      required: [type, username]
+      properties:
+        type: { $ref: "#/components/schemas/CommandType" }
+        username: { type: string, minLength: 1, maxLength: 20 }
+    
+    DisconnectCommandPayload:
       type: object
       required: [type, username]
       properties:
