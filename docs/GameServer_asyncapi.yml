@@ -229,7 +229,7 @@ components:
       required: [type, username]
       properties:
         type: { $ref: "#/components/schemas/CommandType" }
-        username: { type: string, minLength: 1, maxLength: 20 }
+        username: { type: string, minLength: 1, maxLength: 50 }
         playerId:
           type: string
           description: >-
@@ -244,7 +244,7 @@ components:
       required: [type, username]
       properties:
         type: { $ref: "#/components/schemas/CommandType" }
-        username: { type: string, minLength: 1, maxLength: 20 }
+        username: { type: string, minLength: 1, maxLength: 50 }
 
     StartGameCommandPayload:
       type: object
@@ -252,7 +252,7 @@ components:
       properties:
         type: { $ref: "#/components/schemas/CommandType" }
         boardSize: { $ref: "#/components/schemas/BoardSize" }
-        treasureCardCount: { type: integer, default: 24 }
+        treasureCardCount: { type: integer, default: 24, minimum: 2, maximum: 24 }
         totalBonusCount: { type: integer, default: 0 }
         gameDurationInSeconds: { type: integer }
 
@@ -422,8 +422,8 @@ components:
       type: object
       required: [rows, cols]
       properties:
-        rows: { type: integer, minimum: 3, default: 7 }
-        cols: { type: integer, minimum: 3, default: 7 }
+        rows: { type: integer, minimum: 3, maximum: 11, default: 7 }
+        cols: { type: integer, minimum: 3, maximum: 11, default: 7 }
 
     
     PlayerInfo:
@@ -470,6 +470,9 @@ components:
         treasure: { $ref: "#/components/schemas/Treasure" }
         bonus: { $ref: "#/components/schemas/Bonus" }
         isFixed: { type: boolean, default: false }
+      not:
+        required: ["treasure", "bonus"]
+
 
     GameBoard:
       type: object
