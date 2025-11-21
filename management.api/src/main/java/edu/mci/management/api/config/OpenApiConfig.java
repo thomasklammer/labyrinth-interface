@@ -20,7 +20,7 @@ public class OpenApiConfig {
                         .description("This API enables the registration, discovery, and lifecycle management of game servers for 'The Amazing Labyrinth'. Game servers use this API to make themselves discoverable, while clients use it to find active games to join.")
                 )
                 .servers(List.of(
-                        new Server().url("http://localhost:8080").description("Local development server")
+                        new Server().url("http://localhost:8081").description("Local development server")
                 ));
     }
 }
