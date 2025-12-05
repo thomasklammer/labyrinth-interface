@@ -436,23 +436,22 @@ components:
         isReady: { type: boolean }
 
     PlayerState:
-      allOf:
-        - $ref: "#/components/schemas/PlayerInfo"
-        - type: object
-          properties:
-            currentPosition: { $ref: "#/components/schemas/Coordinates" }
-            homePosition: { $ref: "#/components/schemas/Coordinates" }
-            treasuresFound:
-              type: array
-              items: { $ref: "#/components/schemas/Treasure" }
-            currentTreasure: { $ref: "#/components/schemas/Treasure" }
-            remainingTreasureCount: { type: integer }
-            achievements:
-              type: array
-              items: { $ref: "#/components/schemas/AchievementType" }
-            availableBonuses:
-               type: array
-               items: { $ref: "#/components/schemas/BonusType" }
+      type: object
+      properties:
+        playerInfo: { $ref: "#/components/schemas/PlayerInfo" }
+        currentPosition: { $ref: "#/components/schemas/Coordinates" }
+        homePosition: { $ref: "#/components/schemas/Coordinates" }
+        treasuresFound:
+          type: array
+          items: { $ref: "#/components/schemas/Treasure" }
+        currentTreasure: { $ref: "#/components/schemas/Treasure" }
+        remainingTreasureCount: { type: integer }
+        achievements:
+          type: array
+          items: { $ref: "#/components/schemas/AchievementType" }
+        availableBonuses:
+           type: array
+           items: { $ref: "#/components/schemas/BonusType" }
 
     Coordinates:
       type: object
