@@ -211,7 +211,7 @@ components:
 
     ErrorCode:
        type: string
-       enum: [GENERAL, INVALID_MOVE, NOT_YOUR_TURN, INVALID_PUSH, BONUS_NOT_AVAILABLE]
+       enum: [GENERAL, INVALID_MOVE, NOT_YOUR_TURN, INVALID_PUSH, BONUS_NOT_AVAILABLE, LOBBY_FULL, GAME_ALREADY_STARTED, NOT_ADMIN, INVALID_COMMAND, USERNAME_TAKEN]
 
     BonusType:
        type: string
@@ -219,7 +219,7 @@ components:
 
     AchievementType:
        type: string
-       enum: [RUNNER, PUSHER, BLOCKER, TIME_WASTER, HATTRICK]
+       enum: [RUNNER, PUSHER, BLOCKER]
 
     # ===========================
     # === Command Payloads    ===
@@ -230,7 +230,7 @@ components:
       properties:
         type: { $ref: "#/components/schemas/CommandType" }
         username: { type: string, minLength: 1, maxLength: 50 }
-        playerId:
+        identifierToken:
           type: string
           description: >-
             Optional: previously assigned player identifier used for reconnection.
@@ -241,10 +241,9 @@ components:
     
     DisconnectCommandPayload:
       type: object
-      required: [type, username]
+      required: [type]
       properties:
         type: { $ref: "#/components/schemas/CommandType" }
-        username: { type: string, minLength: 1, maxLength: 50 }
 
     StartGameCommandPayload:
       type: object
@@ -291,7 +290,7 @@ components:
 
     UseSwapCommandPayload:
       type: object
-      required: [type, targetPlayerId]
+      required: [type, targetPlayerId]  
       properties:
         type: { $ref: "#/components/schemas/CommandType" }
         targetPlayerId: { type: string }
@@ -328,10 +327,10 @@ components:
 
     ConnectAckEventPayload:
       type: object
-      required: [type, playerId]
+      required: [type, identifierToken]
       properties:
         type: { $ref: "#/components/schemas/EventType" }
-        playerId:
+        identifierToken:
           type: string
           description: "The unique identifier assigned to the player by the server. Clients should persist this id for reconnection attempts."
 
@@ -433,7 +432,7 @@ components:
         name: { type: string }
         color: { $ref: "#/components/schemas/PlayerColor" }
         isAdmin: { type: boolean }
-        isReady: { type: boolean }
+        isAiControlled: { type: boolean }
 
     PlayerState:
       type: object
@@ -444,7 +443,6 @@ components:
         treasuresFound:
           type: array
           items: { $ref: "#/components/schemas/Treasure" }
-        currentTreasure: { $ref: "#/components/schemas/Treasure" }
         remainingTreasureCount: { type: integer }
         achievements:
           type: array
