@@ -111,11 +111,11 @@ components:
         $ref: "#/components/schemas/ServerInfoPayload"
     connectAckEvent:
       messageId: connectAckEvent
-      summary: "Unicast: Acknowledges a successful lobby join and returns the assigned player id."
+      summary: "Unicast: Acknowledges a successful lobby join and returns the assigned player id and identifier token."
       description: |
         Sent only to the connecting client immediately after a successful `connectCommand`.
         Contains the `playerId` the server assigned or confirmed so the client knows
-        that joining the lobby succeeded and which id to persist for reconnection.
+        that joining the lobby succeeded. Additionally, includes the `identifierToken`, which is used for reconnection during a game.
       payload:
         $ref: "#/components/schemas/ConnectAckEventPayload"
     lobbyStateEvent:
@@ -330,6 +330,9 @@ components:
       required: [type, identifierToken]
       properties:
         type: { $ref: "#/components/schemas/EventType" }
+        playerId:
+            type: string
+            description: "The unique identifier assigned to the player for this session."
         identifierToken:
           type: string
           description: "The unique identifier assigned to the player by the server. Clients should persist this id for reconnection attempts."
