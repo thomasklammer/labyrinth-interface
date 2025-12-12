@@ -47,14 +47,12 @@ jobs:
 
       - name: Generate Models Script
         run: |
-          # Erstellt das Skript temporär direkt im Runner
           cat << 'EOF' > generate-models.js
           const { JavaGenerator, JAVA_COMMON_PRESET } = require("@asyncapi/modelina");
           const fs = require("fs");
           const { Parser } = require("@asyncapi/parser");
 
           async function main() {
-            // Pfad ggf. anpassen, falls er im Repo anders liegt
             const yaml = fs.readFileSync("docs/GameServer_asyncapi.yml", "utf8");
 
             const parser = new Parser();
@@ -75,7 +73,7 @@ jobs:
             }
 
             for (const model of models) {
-              const fileName = \`\${outputDir}/\${model.modelName}.java\`;
+              const fileName = `${outputDir}/${model.modelName}.java`;
               fs.writeFileSync(fileName, model.result);
               console.log("Generated:", fileName);
             }
