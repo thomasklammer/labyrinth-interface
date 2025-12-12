@@ -297,9 +297,14 @@ components:
 
     UsePushFixedCommandPayload:
       type: object
-      required: [type]
+      required: [type, rowOrColIndex, direction, tileEntrances]
       properties:
         type: { $ref: "#/components/schemas/CommandType" }
+        rowOrColIndex: { type: integer }
+        direction: { $ref: "#/components/schemas/Direction" }
+        tileEntrances:
+          type: array
+          items: { $ref: "#/components/schemas/Direction" }
 
     UsePushTwiceCommandPayload:
       type: object
