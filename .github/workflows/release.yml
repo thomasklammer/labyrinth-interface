@@ -28,6 +28,9 @@ jobs:
           distribution: temurin
           java-version: '21'
 
+      - name: Run Tests
+        run: mvn -B -Drevision=${{ env.VERSION }} -f management.api/pom.xml test
+
       - name: Build management.api (Maven)
         run: mvn -B -DskipTests -Drevision=${{ env.VERSION }} -f management.api/pom.xml package
 
