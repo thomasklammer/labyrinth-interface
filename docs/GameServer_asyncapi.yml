@@ -25,6 +25,7 @@ channels:
           - $ref: "#/components/messages/connectCommand"
           - $ref: "#/components/messages/disconnectCommand"
           - $ref: "#/components/messages/startGameCommand"
+          - $ref: "#/components/messages/rotateTileCommand"
           - $ref: "#/components/messages/pushTileCommand"
           - $ref: "#/components/messages/movePawnCommand"
           - $ref: "#/components/messages/toggleAICommand"
@@ -41,10 +42,9 @@ channels:
           - $ref: "#/components/messages/lobbyStateEvent"
           - $ref: "#/components/messages/connectAckEvent"
           - $ref: "#/components/messages/gameStartedEvent"
-          - $ref: "#/components/messages/gameStateUpdateEvent"
-          - $ref: "#/components/messages/playerTurnEvent"
+          - $ref: "#/components/messages/gameStateEvent"
+          - $ref: "#/components/messages/playerUpdatedEvent"
           - $ref: "#/components/messages/actionErrorEvent"
-          - $ref: "#/components/messages/playerDisconnectedEvent"
           - $ref: "#/components/messages/achievementUnlockedEvent"
           - $ref: "#/components/messages/gameOverEvent"
           - $ref: "#/components/messages/nextTreasureCardEvent"
@@ -67,9 +67,14 @@ components:
       summary: "Admin only: Start the game with specific settings."
       payload:
         $ref: "#/components/schemas/StartGameCommandPayload"
+    rotateTileCommand:
+      messageId: rotateTileCommand
+      summary: "Rotates the current tile clockwise"
+      payload:
+        $ref: "#/components/schemas/RotateTileCommandPayload"
     pushTileCommand:
       messageId: pushTileCommand
-      summary: "Push the extra tile into the board. Includes implied rotation."
+      summary: "Push the spare tile into the board. Includes implied rotation."
       payload:
         $ref: "#/components/schemas/PushTileCommandPayload"
     movePawnCommand:
@@ -125,29 +130,24 @@ components:
         $ref: "#/components/schemas/LobbyStateEventPayload"
     gameStartedEvent:
       messageId: gameStartedEvent
-      summary: "Broadcast: The game has officially started."
+      summary: "Broadcast: Full board, player states, and turn info update."
       payload:
-        $ref: "#/components/schemas/GameStartedEventPayload"
-    gameStateUpdateEvent:
-      messageId: gameStateUpdateEvent
+        $ref: "#/components/schemas/GameStateEventPayload"
+    gameStateEvent:
+      messageId: gameStateEvent
       summary: "Broadcast: Full board and player state update."
       payload:
-        $ref: "#/components/schemas/GameStateUpdateEventPayload"
-    playerTurnEvent:
-      messageId: playerTurnEvent
-      summary: "Broadcast: Notifies all players whose turn it is."
+        $ref: "#/components/schemas/GameStateEventPayload"
+    playerUpdatedEvent:
+      messageId: playerUpdatedEvent
+      summary: "Broadcast: A player's info updated only during the game. Optional event to inform about changes like AI control toggling. If not send, the players info will be updated with the next gameStateEvent."
       payload:
-        $ref: "#/components/schemas/PlayerTurnEventPayload"
+        $ref: "#/components/schemas/PlayerUpdatedEventPayload"
     actionErrorEvent:
       messageId: actionErrorEvent
       summary: "Unicast: The last command failed."
       payload:
         $ref: "#/components/schemas/ActionErrorEventPayload"
-    playerDisconnectedEvent:
-      messageId: playerDisconnectedEvent
-      summary: "Broadcast: A player lost connection."
-      payload:
-        $ref: "#/components/schemas/PlayerDisconnectedEventPayload"
     achievementUnlockedEvent:
       messageId: achievementUnlockedEvent
       summary: "Broadcast: Player unlocked an achievement."
@@ -174,6 +174,7 @@ components:
         - CONNECT
         - DISCONNECT
         - START_GAME
+        - ROTATE_TILE
         - PUSH_TILE
         - MOVE_PAWN
         - TOGGLE_AI
@@ -189,9 +190,8 @@ components:
         - LOBBY_STATE
         - GAME_STARTED
         - GAME_STATE_UPDATE
-        - PLAYER_TURN
         - ACTION_ERROR
-        - PLAYER_DISCONNECTED
+        - PLAYER_UPDATED
         - ACHIEVEMENT_UNLOCKED
         - GAME_OVER
         - NEXT_TREASURE
@@ -207,7 +207,7 @@ components:
 
     TurnState:
       type: string
-      enum: [WAITING_FOR_PUSH, WAITING_FOR_MOVE, WAITING_FOR_BONUS]
+      enum: [WAITING_FOR_PUSH, WAITING_FOR_MOVE]
 
     ErrorCode:
        type: string
@@ -219,7 +219,7 @@ components:
 
     AchievementType:
        type: string
-       enum: [RUNNER, PUSHER, BLOCKER]
+       enum: [RUNNER, PUSHER]
 
     # ===========================
     # === Command Payloads    ===
@@ -247,25 +247,27 @@ components:
 
     StartGameCommandPayload:
       type: object
-      required: [type, boardSize, treasureCardCount]
+      required: [type, boardSize]
       properties:
         type: { $ref: "#/components/schemas/CommandType" }
         boardSize: { $ref: "#/components/schemas/BoardSize" }
         treasureCardCount: { type: integer, default: 24, minimum: 2, maximum: 24 }
-        totalBonusCount: { type: integer, default: 0 }
-        gameDurationInSeconds: { type: integer }
+        totalBonusCount: { type: integer, default: 0, minimum: 0, maximum: 20 }
+        gameDurationInSeconds: { type: integer, default: 3600, minimum: 0 }
+
+    RotateTileCommandPayload:
+      type: object
+      required: [type]
+      properties:
+        type: { $ref: "#/components/schemas/CommandType" }
 
     PushTileCommandPayload:
       type: object
-      required: [type, rowOrColIndex, direction, tileEntrances]
+      required: [type, rowOrColIndex, direction]
       properties:
         type: { $ref: "#/components/schemas/CommandType" }
         rowOrColIndex: { type: integer }
         direction: { $ref: "#/components/schemas/Direction" }
-        tileEntrances:
-          type: array
-          minItems: 1
-          items: { $ref: "#/components/schemas/Direction" }
 
     MovePawnCommandPayload:
       type: object
@@ -297,14 +299,12 @@ components:
 
     UsePushFixedCommandPayload:
       type: object
-      required: [type, rowOrColIndex, direction, tileEntrances]
+      required: [type, rowOrColIndex, direction]
       properties:
         type: { $ref: "#/components/schemas/CommandType" }
         rowOrColIndex: { type: integer }
         direction: { $ref: "#/components/schemas/Direction" }
-        tileEntrances:
-          type: array
-          items: { $ref: "#/components/schemas/Direction" }
+      description: "Push a normally fixed tile using the Push Fixed bonus. It's not allowed to move border tiles to prevent removing home bases of the players."
 
     UsePushTwiceCommandPayload:
       type: object
@@ -346,36 +346,24 @@ components:
           type: array
           items: { $ref: "#/components/schemas/PlayerInfo" }
 
-    GameStartedEventPayload:
+    PlayerUpdatedEventPayload:
       type: object
-      required: [type, initialBoard, players]
+      required: [ type, player ]
       properties:
         type: { $ref: "#/components/schemas/EventType" }
-        initialBoard: { $ref: "#/components/schemas/GameBoard" }
-        players:
-           type: array
-           items: { $ref: "#/components/schemas/PlayerState" }
+        player: { $ref: "#/components/schemas/PlayerInfo" }
 
-    GameStateUpdateEventPayload:
+    GameStateEventPayload:
       type: object
-      required: [type, board, players, currentPlayerId, currentTurnState]
+      required: [type, board, players, currentTurnInfo]
       properties:
         type: { $ref: "#/components/schemas/EventType" }
         board: { $ref: "#/components/schemas/GameBoard" }
         players:
           type: array
           items: { $ref: "#/components/schemas/PlayerState" }
-        currentPlayerId: { type: string }
-        currentTurnState: { $ref: "#/components/schemas/TurnState" }
-
-    PlayerTurnEventPayload:
-      type: object
-      required: [type, playerId, extraTile]
-      properties:
-        type: { $ref: "#/components/schemas/EventType" }
-        playerId: { type: string }
-        extraTile: { $ref: "#/components/schemas/Tile" }
-        turnTimeLimitSeconds: { type: integer }
+        currentTurnInfo: { $ref: "#/components/schemas/CurrentTurnInfo" }
+        gameEndTime: { type: string, format: date-time }
 
     ActionErrorEventPayload:
       type: object
@@ -384,13 +372,6 @@ components:
         type: { $ref: "#/components/schemas/EventType" }
         errorCode: { $ref: "#/components/schemas/ErrorCode" }
         message: { type: string }
-
-    PlayerDisconnectedEventPayload:
-      type: object
-      required: [type, playerId]
-      properties:
-        type: { $ref: "#/components/schemas/EventType" }
-        playerId: { type: string }
 
     AchievementUnlockedEventPayload:
       type: object
@@ -426,8 +407,17 @@ components:
       properties:
         rows: { type: integer, minimum: 3, maximum: 11, default: 7 }
         cols: { type: integer, minimum: 3, maximum: 11, default: 7 }
+      description: |
+        The BoardSize object defines the dimensions of the game board.
+        Coordinate System:
+        - The origin (0,0) is located at the top-left corner of the board.
+        - Rows increase as you move downward.
+        - Columns increase as you move to the right.
+        - The bottom-right corner corresponds to (rows-1, cols-1).
+        - The top-right corner corresponds to (0, cols-1).
+        - The bottom-left corner corresponds to (rows-1, 0).
+        - Only odd numbers of rows and columns are allowed.
 
-    
     PlayerInfo:
       type: object
       properties:
@@ -436,6 +426,15 @@ components:
         color: { $ref: "#/components/schemas/PlayerColor" }
         isAdmin: { type: boolean }
         isAiControlled: { type: boolean }
+        isConnected: { type: boolean }
+
+    CurrentTurnInfo:
+      type: object
+      required: [ currentPlayerId, timeLimitSeconds, state ]
+      properties:
+        currentPlayerId: { type: string }
+        timeLimitSeconds: { type: integer }
+        state: { $ref: "#/components/schemas/TurnState" }
 
     PlayerState:
       type: object
@@ -456,10 +455,10 @@ components:
 
     Coordinates:
       type: object
-      required: [x, y]
+      required: [row, column]
       properties:
-        x: { type: integer }
-        y: { type: integer }
+        row: { type: integer }
+        column: { type: integer }
 
     Tile:
       type: object
@@ -484,6 +483,7 @@ components:
           items:
              type: array
              items: { $ref: "#/components/schemas/Tile" }
+        spareTile: { $ref: "#/components/schemas/Tile" }
         lastPush: { $ref: "#/components/schemas/PushActionInfo" }
 
     PushActionInfo:
