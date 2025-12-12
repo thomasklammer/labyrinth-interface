@@ -21,6 +21,7 @@ jobs:
           TAG=${TAG#v}
           echo "VERSION=${TAG}" >> $GITHUB_ENV
 
+      # --- START JAVA BUILD ---
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
@@ -33,12 +34,69 @@ jobs:
       - name: Find built JAR
         id: find_jar
         run: echo "JAR_PATH=$(ls management.api/target/*.jar | head -n 1)" >> $GITHUB_ENV
+      # --- END JAVA BUILD ---
 
-      - name: Create GitHub Release and attach JAR
+      # --- START MODEL GENERATION ---
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install AsyncAPI dependencies
+        run: npm install @asyncapi/modelina @asyncapi/parser
+
+      - name: Generate Models Script
+        run: |
+          # Erstellt das Skript temporär direkt im Runner
+          cat << 'EOF' > generate-models.js
+          const { JavaGenerator, JAVA_COMMON_PRESET } = require("@asyncapi/modelina");
+          const fs = require("fs");
+          const { Parser } = require("@asyncapi/parser");
+
+          async function main() {
+            // Pfad ggf. anpassen, falls er im Repo anders liegt
+            const yaml = fs.readFileSync("docs/GameServer_asyncapi.yml", "utf8");
+
+            const parser = new Parser();
+            const { document } = await parser.parse(yaml);
+
+            const generator = new JavaGenerator({
+              presets: [JAVA_COMMON_PRESET]
+            });
+
+            const models = await generator.generateCompleteModels(document, {
+              packageName: "labyrinth.contracts.models",
+            });
+
+            const outputDir = "./generated-models";
+            
+            if (!fs.existsSync(outputDir)) {
+              fs.mkdirSync(outputDir);
+            }
+
+            for (const model of models) {
+              const fileName = \`\${outputDir}/\${model.modelName}.java\`;
+              fs.writeFileSync(fileName, model.result);
+              console.log("Generated:", fileName);
+            }
+          }
+          main().catch(console.error);
+          EOF
+
+      - name: Run Model Generation
+        run: node generate-models.js
+
+      - name: Zip Generated Models
+        run: zip -r java-models.zip generated-models/
+      # --- END MODEL GENERATION ---
+
+      - name: Create GitHub Release and attach files
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
           name: Release ${{ env.VERSION }}
-          files: ${{ env.JAR_PATH }}
+          files: |
+            ${{ env.JAR_PATH }}
+            java-models.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
