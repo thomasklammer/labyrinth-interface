@@ -467,7 +467,7 @@ components:
           type: array
           items: { $ref: "#/components/schemas/Direction" }
         treasure: { $ref: "#/components/schemas/Treasure" }
-        bonus: { $ref: "#/components/schemas/Bonus" }
+        bonus: { $ref: "#/components/schemas/BonusType" }
         isFixed: { type: boolean, default: false }
       not:
         required: ["treasure", "bonus"]
@@ -498,12 +498,6 @@ components:
       properties:
         id: { type: integer }
         name: { type: string }
-
-    Bonus:
-       type: object
-       properties:
-         id: { type: integer }
-         type: { $ref: "#/components/schemas/BonusType" }
 
     RankingEntry:
       type: object
